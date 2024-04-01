@@ -56,7 +56,6 @@ with open("RPAL.txt", "r") as f:
 
         if inputString[i].isalpha():
             temp = i
-            # while i + 1 < len(inputString) and inputString[i + 1].isalpha():
             while i + 1 < len(inputString) and (
                 (inputString[i + 1].isalpha())
                 or (inputString[i + 1].isdigit())
@@ -65,7 +64,6 @@ with open("RPAL.txt", "r") as f:
                 i += 1
             token = inputString[temp : i + 1]
             Input_Tokens.append(Token(token, "<IDENTIFIER>"))
-            print(token)
 
         elif inputString[i].isdigit():
             temp = i
@@ -73,7 +71,6 @@ with open("RPAL.txt", "r") as f:
                 i += 1
             token = inputString[temp : i + 1]
             Input_Tokens.append(Token(token, "<INTEGER>"))
-            print(token)
 
         elif inputString[i] == " " or inputString[i] == "\t" or inputString[i] == "\n":
             temp = i
@@ -85,27 +82,22 @@ with open("RPAL.txt", "r") as f:
                 i += 1
             token = inputString[temp : i + 1]
             Input_Tokens.append(Token(repr(token), "<DELETE>"))
-            print(token)
 
         elif inputString[i] == "(":
             token = "("
             Input_Tokens.append(Token("(", "("))
-            print(token)
 
         elif inputString[i] == ")":
             token = ")"
             Input_Tokens.append(Token(")", ")"))
-            print(token)
 
         elif inputString[i] == ";":
             token = ";"
             Input_Tokens.append(Token(";", ";"))
-            print(token)
 
         elif inputString[i] == ",":
             token = ","
             Input_Tokens.append(Token(",", ","))
-            print(token)
 
         elif inputString[i] == '"':
             temp = i
@@ -131,7 +123,7 @@ with open("RPAL.txt", "r") as f:
                 i += 1
                 token = inputString[temp : i + 1]
                 Input_Tokens.append(Token(token, "<STRING>"))
-                print(token)
+
 
             else:
                 raise MyCustomError('need " ')
@@ -151,16 +143,12 @@ with open("RPAL.txt", "r") as f:
                 and (not (inputString[i + 1] == "\n"))
             ):
                 i += 1
-            # token = inputString[temp: i + 1]
-            # Input_Tokens.append(Token(token, "<DELETE>"))
-            print(token)
 
             if i + 1 < len(inputString) and inputString[i + 1] == "\n":
                 i += 1
                 # token = inputString[temp : i + 1]   #with last newline
                 token = inputString[temp:i]  # without newline
                 Input_Tokens.append(Token(token, "<DELETE>"))
-                print(token)
 
             else:
                 raise MyCustomError("need to end with newline")
@@ -171,7 +159,6 @@ with open("RPAL.txt", "r") as f:
                 i += 1
             token = inputString[temp : i + 1]
             Input_Tokens.append(Token(token, "<OPERATOR>"))
-            print(token)
 
         i += 1
 
@@ -190,4 +177,3 @@ for token in Input_Tokens:
 
 for token in Tokens:
     print(token.value, token.type)
-
