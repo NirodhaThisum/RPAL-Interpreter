@@ -143,6 +143,7 @@ with open("RPAL.txt", "r") as f:
             ):
                 i += 1
 
+
             if i + 1 < len(inputString) and inputString[i + 1] == "\n":
                 i += 1
                 # token = inputString[temp : i + 1]   #with last newline
@@ -176,3 +177,4 @@ for token in Input_Tokens:
 
 for token in Tokens:
     print(token.value, token.type)
+
