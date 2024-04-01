@@ -134,9 +134,13 @@ with open("RPAL.txt", "r") as f:
                 print(token)
 
             else:
-                raise MyCustomError("need \" ")
+                raise MyCustomError('need " ')
 
-        elif inputString[i] == "/" and (i + 1 < len(inputString)) and inputString[i + 1] == "/":
+        elif (
+            inputString[i] == "/"
+            and (i + 1 < len(inputString))
+            and inputString[i + 1] == "/"
+        ):
             temp = i
             while i + 1 < len(inputString) and (
                 (inputString[i + 1] in comment_elements)
@@ -144,23 +148,22 @@ with open("RPAL.txt", "r") as f:
                 or inputString[i + 1].isalpha()
                 or inputString[i + 1].isdigit()
                 or inputString[i + 1] in operator_symbol
-                    and (not (inputString[i + 1] == "\n"))):
+                and (not (inputString[i + 1] == "\n"))
+            ):
                 i += 1
             # token = inputString[temp: i + 1]
             # Input_Tokens.append(Token(token, "<DELETE>"))
             print(token)
-                    
 
             if i + 1 < len(inputString) and inputString[i + 1] == "\n":
                 i += 1
                 # token = inputString[temp : i + 1]   #with last newline
-                token = inputString[temp : i]       #without newline
+                token = inputString[temp:i]  # without newline
                 Input_Tokens.append(Token(token, "<DELETE>"))
                 print(token)
 
             else:
                 raise MyCustomError("need to end with newline")
-             
 
         elif inputString[i] in operator_symbol:
             temp = i
@@ -173,5 +176,18 @@ with open("RPAL.txt", "r") as f:
         i += 1
 
 
+# for token in Input_Tokens:
+#     print(token.value, token.type)
+
+
+# Screening
+Tokens = []
+
 for token in Input_Tokens:
+    if token.type != "<DELETE>":
+        Tokens.append(token)
+
+
+for token in Tokens:
     print(token.value, token.type)
+
