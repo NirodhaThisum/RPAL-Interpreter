@@ -122,6 +122,7 @@ class parser:
         self.index = i
         self.sizeOfFile = size
         self.astFlag = af
+        self.nextToken = Token()
 
     def isReservedKey(self, s):
         return s in keys
@@ -143,61 +144,71 @@ class parser:
     def isNumber(self, s):
         return s.isdigit()
 
-    def procedure_E():
+    def read(self, val, type):
+        if val != self.nextToken.getVal() or type != self.nextToken.getType():
+            print("Parse error: Expected", "\"" + val + "\"", "but",
+                  "\"" + self.nextToken.getVal() + "\"", "was there")
+            exit(0)
+
+        if type == "ID" or type == "INT" or type == "STR":
+            self.buildTree(val, type, 0)
+
+        self.nextToken = self.getToken(self.readnew)
+
+        while self.nextToken.getType() == "DELETE":
+            self.nextToken = self.getToken(self.readnew)
+
+    def procedure_E(self):
         # E -> ’let’ D ’in’ E
-        if nextToken.getVal() == "let":
+        if self.nextToken.getVal() == "let":
             # read("let", "KEYWORD")
             procedure_D()
-
             # read("in", "KEYWORD")  # read in
-            procedure_E()
-
+            self.procedure_E()
             # buildTree("let", "KEYWORD", 2)
-        # E -> ’fn’ Vb+ ’.’ E
-        elif nextToken.getVal() == "fn":
-            n = 0
-            read("fn", "KEYWORD")
-            while nextToken.getType() == "ID" or nextToken.getVal() == "(":
-                procedure_Vb()
-                n += 1
-            read(".", "OPERATOR")
-            procedure_E()
 
-            buildTree("lambda", "KEYWORD", n + 1)
+        # E -> ’fn’ Vb+ ’.’ E
+        elif self.nextToken.getVal() == "fn":
+            n = 0
+            # read("fn", "KEYWORD")
+            while self.nextToken.getType() == "ID" or self.nextToken.getVal() == "(":
+                self.procedure_Vb()
+                n += 1
+            # read(".", "OPERATOR")
+            self.procedure_E()
+            # buildTree("lambda", "KEYWORD", n + 1)
+
         # E -> Ew
         else:
-            procedure_Ew()
+            self.procedure_Ew()
 
+    def procedure_Ew(self):
+        self.procedure_T()
+        if self.nextToken.getVal() == "where":
+            # read("where", "KEYWORD")
+            procedure_Dr()
+            # buildTree("where", "KEYWORD", 2)
 
-def procedure_Ew():
-    procedure_T()
-
-    if nextToken.getVal() == "where":
-        read("where", "KEYWORD")
-        procedure_Dr()
-        buildTree("where", "KEYWORD", 2)
-
-
-def procedure_T():
-    procedure_Ta()
-
-    n = 1
-    while nextToken.getVal() == ",":
-        n += 1
-        read(",", "PUNCTION")
+    def procedure_T(self):
         procedure_Ta()
 
-    if n > 1:
-        buildTree("tau", "KEYWORD", n)
+        n = 1
+        while self.nextToken.getVal() == ",":
+            n += 1
+            # read(",", "PUNCTION")
+            procedure_Ta()
+
+        if n > 1:
+            # buildTree("tau", "KEYWORD", n)
 
 
-def procedure_Ta():
-    procedure_Tc()
-
-    while nextToken.getVal() == "aug":
-        read("aug", "KEYWORD")
+    def procedure_Ta():
         procedure_Tc()
-        buildTree("aug", "KEYWORD", 2)
+
+        while nextToken.getVal() == "aug":
+            read("aug", "KEYWORD")
+            procedure_Tc()
+            buildTree("aug", "KEYWORD", 2)
 
 
 def procedure_Tc():
