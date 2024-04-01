@@ -124,7 +124,6 @@ with open("RPAL.txt", "r") as f:
                 token = inputString[temp : i + 1]
                 Input_Tokens.append(Token(token, "<STRING>"))
 
-
             else:
                 raise MyCustomError('need " ')
 
