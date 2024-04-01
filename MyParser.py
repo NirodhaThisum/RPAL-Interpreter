@@ -1,3 +1,27 @@
+class Token:
+    def __init__(self):
+        self.type = ""
+        self.val = ""
+
+    # Set type of token
+    def setType(self, sts):
+        self.type = sts
+
+    # Set value of token
+    def setVal(self, str):
+        self.val = str
+
+    # Get type of token
+    def getType(self):
+        return self.type
+
+    # Get value of token
+    def getVal(self):
+        return self.val
+
+    # Define inequality operator
+    def __ne__(self, t):
+        return self.type != t.type
 
 binary_operators = ["+", "-", "*", "/", "**", "gr", "ge", "<",
                     "<=", ">", ">=", "ls", "le", "eq", "ne", "&", "or", "><"]
@@ -118,6 +142,268 @@ class parser:
 
     def isNumber(self, s):
         return s.isdigit()
+
+    def procedure_E():
+        # E -> ’let’ D ’in’ E
+        if nextToken.getVal() == "let":
+            # read("let", "KEYWORD")
+            procedure_D()
+
+            # read("in", "KEYWORD")  # read in
+            procedure_E()
+
+            # buildTree("let", "KEYWORD", 2)
+        # E -> ’fn’ Vb+ ’.’ E
+        elif nextToken.getVal() == "fn":
+            n = 0
+            read("fn", "KEYWORD")
+            while nextToken.getType() == "ID" or nextToken.getVal() == "(":
+                procedure_Vb()
+                n += 1
+            read(".", "OPERATOR")
+            procedure_E()
+
+            buildTree("lambda", "KEYWORD", n + 1)
+        # E -> Ew
+        else:
+            procedure_Ew()
+
+
+def procedure_Ew():
+    procedure_T()
+
+    if nextToken.getVal() == "where":
+        read("where", "KEYWORD")
+        procedure_Dr()
+        buildTree("where", "KEYWORD", 2)
+
+
+def procedure_T():
+    procedure_Ta()
+
+    n = 1
+    while nextToken.getVal() == ",":
+        n += 1
+        read(",", "PUNCTION")
+        procedure_Ta()
+
+    if n > 1:
+        buildTree("tau", "KEYWORD", n)
+
+
+def procedure_Ta():
+    procedure_Tc()
+
+    while nextToken.getVal() == "aug":
+        read("aug", "KEYWORD")
+        procedure_Tc()
+        buildTree("aug", "KEYWORD", 2)
+
+
+def procedure_Tc():
+    procedure_B()
+
+    if nextToken.getVal() == "->":
+        read("->", "OPERATOR")
+        procedure_Tc()
+        read("|", "OPERATOR")
+        procedure_Tc()
+        buildTree("->", "KEYWORD", 3)
+
+
+def procedure_B():
+    procedure_Bt()
+
+    while nextToken.getVal() == "or":
+        read("or", "KEYWORD")
+        procedure_Bt()
+        buildTree("or", "KEYWORD", 2)
+
+
+def procedure_Bt():
+    procedure_Bs()
+
+    while nextToken.getVal() == "&":
+        read("&", "OPERATOR")
+        procedure_Bs()
+        buildTree("&", "KEYWORD", 2)
+
+
+def procedure_Bs():
+    if nextToken.getVal() == "not":
+        read("not", "KEYWORD")
+        procedure_Bp()
+        buildTree("not", "KEYWORD", 1)
+    else:
+        procedure_Bp()
+
+
+def procedure_Bp():
+    procedure_A()
+    temp = nextToken.getVal()
+    temp2 = nextToken.getType()
+
+    if temp in ["gr", ">", "ge", ">=", "ls", "<", "le", "<=", "eq", "ne"]:
+        read(temp, temp2)
+        procedure_A()
+        buildTree(temp, "KEYWORD", 2)
+    elif temp == "ne":
+        read(temp, temp2)
+        procedure_A()
+        buildTree(temp, "KEYWORD", 2)
+
+
+def procedure_A():
+    if nextToken.getVal() == "+":
+        read("+", "OPERATOR")
+        procedure_At()
+    elif nextToken.getVal() == "-":
+        read("-", "OPERATOR")
+        procedure_At()
+        buildTree("neg", "KEYWORD", 1)
+    else:
+        procedure_At()
+
+    while nextToken.getVal() in ["+", "-"]:
+        temp = nextToken.getVal()
+        read(temp, "OPERATOR")
+        procedure_At()
+        buildTree(temp, "OPERATOR", 2)
+
+
+def procedure_At():
+    procedure_Af()
+
+    while nextToken.getVal() in ["*", "/"]:
+        temp = nextToken.getVal()
+        read(temp, "OPERATOR")
+        procedure_Af()
+        buildTree(temp, "OPERATOR", 2)
+
+
+def procedure_Af():
+    procedure_Ap()
+
+    if nextToken.getVal() == "**":
+        read("**", "OPERATOR")
+        procedure_Af()
+        buildTree("**", "KEYWORD", 2)
+
+
+def procedure_Ap():
+    procedure_R()
+    while nextToken.getVal() == "@":
+        read("@", "OPERATOR")
+        if nextToken.getType() != "ID":
+            print("Exception: UNEXPECTED_TOKEN")
+        else:
+            read(nextToken.getVal(), "ID")
+            procedure_R()
+            buildTree("@", "KEYWORD", 3)
+
+
+def procedure_R():
+    procedure_Rn()
+    while nextToken.getType() in ["ID", "INT", "STR"] or nextToken.getVal() in ["true", "false", "nil", "(", "dummy"]:
+        procedure_Rn()
+        buildTree("gamma", "KEYWORD", 2)
+
+
+def procedure_Rn():
+    if nextToken.getType() in ["ID", "INT", "STR"]:
+        read(nextToken.getVal(), nextToken.getType())
+    elif nextToken.getVal() in ["true", "false", "nil"]:
+        read(nextToken.getVal(), "KEYWORD")
+        buildTree(nextToken.getVal(), "BOOL", 0)
+    elif nextToken.getVal() == "(":
+        read("(", "PUNCTION")
+        procedure_E()
+        read(")", "PUNCTION")
+    elif nextToken.getVal() == "dummy":
+        read("dummy", "KEYWORD")
+        buildTree("dummy", "DUMMY", 0)
+
+
+def procedure_D():
+    procedure_Da()
+    if nextToken.getVal() == "within":
+        read("within", "KEYWORD")
+        procedure_Da()
+        buildTree("within", "KEYWORD", 2)
+
+
+def procedure_Da():
+    procedure_Dr()
+
+    n = 1
+    while nextToken.getVal() == "and":
+        n += 1
+        read("and", "KEYWORD")
+        procedure_Dr()
+    if n > 1:
+        buildTree("and", "KEYWORD", n)
+
+
+def procedure_Dr():
+    if nextToken.getVal() == "rec":
+        read("rec", "KEYWORD")
+        procedure_Db()
+        buildTree("rec", "KEYWORD", 1)
+    else:
+        procedure_Db()
+
+
+def procedure_Db():
+    if nextToken.getVal() == "(":
+        read("(", "PUNCTION")
+        procedure_D()
+        read(")", "PUNCTION")
+    elif nextToken.getType() == "ID":
+        read(nextToken.getVal(), "ID")
+        n = 1
+        if nextToken.getVal() in ["=", ","]:
+            while nextToken.getVal() == ",":
+                read(",", "PUNCTION")
+                read(nextToken.getVal(), "ID")
+                n += 1
+            if n > 1:
+                buildTree(",", "KEYWORD", n)
+            read("=", "OPERATOR")
+            procedure_E()
+            buildTree("=", "KEYWORD", 2)
+        else:
+            while nextToken.getType() == "ID" or nextToken.getVal() == "(":
+                procedure_Vb()
+                n += 1
+            read("=", "OPERATOR")
+            procedure_E()
+            buildTree("function_form", "KEYWORD", n + 1)
+
+
+def procedure_Vb():
+    if nextToken.getType() == "ID":
+        read(nextToken.getVal(), "ID")
+    elif nextToken.getVal() == "(":
+        read("(", "PUNCTION")
+        if nextToken.getVal() == ")":
+            read(")", "PUNCTION")
+            buildTree("()", "KEYWORD", 0)
+        else:
+            procedure_Vl()
+            read(")", "PUNCTION")
+
+
+def procedure_Vl():
+    n = 1
+    read(nextToken.getVal(), "ID")
+
+    while nextToken.getVal() == ",":
+        read(",", "PUNCTION")
+        read(nextToken.getVal(), "ID")
+        n += 1
+    if n > 1:
+        buildTree(",", "KEYWORD", n)
+
 
 
 read_array = ["let", "x", "=", 5]
