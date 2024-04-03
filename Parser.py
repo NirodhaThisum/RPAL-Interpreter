@@ -250,8 +250,8 @@ class ASTParser:
         # Ap -> Ap ’@’ ’<IDENTIFIER>’ R => ’@’
         while self.current_token.value == "@":
             self.read("@")
-            self.read("<IDENTIFIER>")
-            self.buildTree(self.current_token.value, 0)
+            self.read("UserDefined", "<IDENTIFIER>")
+            self.buildTree("<ID:" + self.current_token.value + ">", 0)
             self.R()
             self.buildTree("@", 2)
 
@@ -276,20 +276,20 @@ class ASTParser:
     def Rn(self):
         # Rn -> ’<IDENTIFIER>’
         if self.current_token.type == "<IDENTIFIER>":
-            self.read("<IDENTIFIER>")
-            self.buildTree(self.current_token.value, 0)
+            self.read("UserDefined", "<IDENTIFIER>")
+            self.buildTree("<ID:" + self.current_token.value + ">", 0)
         # Rn -> ’<INTEGER>’
         elif self.current_token.type == "<INTEGER>":
-            self.read("<INTEGER>")
-            self.buildTree("<INTEGER>", 0)
+            self.read("UserDefined", "<INTEGER>")
+            self.buildTree("<INT:" + self.current_token.value + ">", 0)
         # Rn -> ’<STRING>’
         elif self.current_token.type == "<STRING>":
-            self.read("<STRING>")
-            self.buildTree("<STRING>", 0)
+            self.read("UserDefined", "<STRING>")
+            self.buildTree("<STR:" + self.current_token.value + ">", 0)
         # Rn -> ’true’ => ’true’
         elif self.current_token.value == "true":
             self.read("true")
-            self.vbuildTree("true", 0)
+            self.buildTree("true", 0)
         # Rn -> ’false’ => ’false’
         elif self.current_token.value == "false":
             self.read("false")
@@ -372,8 +372,8 @@ class ASTParser:
     def Vb(self):
         # Vb -> ’<IDENTIFIER>’
         if self.current_token.type == "<IDENTIFIER>":
-            self.read("<IDENTIFIER>")
-            self.buildTree(self.current_token.value, 0)
+            self.read("UserDefined", "<IDENTIFIER>")
+            self.buildTree("<ID:" + self.current_token.value + ">", 0)
         elif self.current_token.value == "(":
             self.read("(")
             # Vb -> ’(’ Vl ’)’
@@ -392,13 +392,13 @@ class ASTParser:
     def Vl(self):
         # Vl -> ’<IDENTIFIER>’ list ’,’ => ’,’?
         if self.current_token.type == "<IDENTIFIER>":
-            self.read("<IDENTIFIER>")
-            self.buildTree(self.current_token.value, 0)
+            self.read("UserDefined", "<IDENTIFIER>")
+            self.buildTree("<ID:" + self.current_token.value + ">", 0)
             n = 0
             while self.current_token.value == ",":
                 self.read(",")
-                self.read("<IDENTIFIER>")
-                self.buildTree(self.current_token.value, 0)
+                self.read("UserDefined", "<IDENTIFIER>")
+                self.buildTree("<ID:" + self.current_token.value + ">", 0)
                 n += 1
             if n > 0:
                 self.buildTree(",", n + 1)
