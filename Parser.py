@@ -69,21 +69,21 @@ class ASTParser:
     def E(self):
         # E -> ’let’ D ’in’ E => ’let’
         if self.current_token.value == "let":
-            self.read("let")
-            D()
-            self.read("in")
-            E()
+            self.read("let", "<KEYWORD>")
+            self.D()
+            self.read("in", "<KEYWORD>")
+            self.E()
             self.buildTree("let", 2)
         # E -> ’fn’ Vb+ ’.’ E => ’lambda’
         elif self.current_token.value == "fn":
-            self.read("fn")
-            Vb()
+            self.read("fn", "<KEYWORD>")
+            self.Vb()
             n = 1
             while self.current_token.value in ["<IDENTIFIER>", "("]:
-                Vb()
+                self.Vb()
                 n += 1
-            self.read(".")
-            E()
+            self.read(".", "<OPERATOR>")
+            self.E()
             self.buildTree("lambda", n + 1)
         # E -> Ew
         else:
