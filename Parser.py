@@ -94,7 +94,7 @@ class ASTParser:
         self.T()  # E -> T
         # Ew -> T ’where’ Dr => ’where’
         if self.current_token.value == "where":
-            self.read("where")
+            self.read("where", "<KEYWORD>")
             self.Dr()
             self.buildTree("where", 2)
 
@@ -103,12 +103,12 @@ class ASTParser:
         self.Ta()  # E -> Ta
         # T -> Ta ( ’,’ Ta )+ => ’tau’
         if self.current_token.value == ",":
-            self.read(",")
+            self.read(",", ",")
             self.Ta()
             n = 1  # track the number pf repitition
             while self.current_token.value == ",":
                 n += 1
-                self.read(",")
+                self.read(",", ",")
                 self.Ta()
             self.buildTree("tau", n + 1)
 
@@ -117,7 +117,7 @@ class ASTParser:
         self.Tc()  # E -> Tc
         # Ta -> Ta ’aug’ Tc => ’aug’
         while self.current_token.value == "aug":
-            self.read("aug")
+            self.read("aug", "<KEYWORD>")
             self.Tc()
             self.buildTree("aug", 2)
 
@@ -126,9 +126,9 @@ class ASTParser:
         self.B()  # E -> B
         # Tc -> B ’->’ Tc ’|’ Tc => ’->’
         if self.current_token.value == "->":
-            self.read("->")
+            self.read("->","<OPERATOR>")
             self.Tc()
-            self.read("|")
+            self.read("|", )
             self.Tc()
             self.buildTree("->", 3)
 
@@ -251,7 +251,7 @@ class ASTParser:
         while self.current_token.value == "@":
             self.read("@")
             self.read("<IDENTIFIER>")
-            self.buildTree("<IDENTIFIER>", 0)
+            self.buildTree(self.current_token.value, 0)
             self.R()
             self.buildTree("@", 2)
 
@@ -275,15 +275,15 @@ class ASTParser:
 
     def Rn(self):
         # Rn -> ’<IDENTIFIER>’
-        if self.current_token.value == "<IDENTIFIER>":
+        if self.current_token.type == "<IDENTIFIER>":
             self.read("<IDENTIFIER>")
-            self.buildTree("<IDENTIFIER>", 0)
+            self.buildTree(self.current_token.value, 0)
         # Rn -> ’<INTEGER>’
-        elif self.current_token.value == "<INTEGER>":
+        elif self.current_token.type == "<INTEGER>":
             self.read("<INTEGER>")
             self.buildTree("<INTEGER>", 0)
         # Rn -> ’<STRING>’
-        elif self.current_token.value == "<STRING>":
+        elif self.current_token.type == "<STRING>":
             self.read("<STRING>")
             self.buildTree("<STRING>", 0)
         # Rn -> ’true’ => ’true’
@@ -348,7 +348,7 @@ class ASTParser:
             self.D()
             self.read(")")
             n = 0
-        if self.current_token.value == "<IDENTIFIER>":
+        if self.current_token.type == "<IDENTIFIER>":
             # Db -> Vl ’=’ E => ’=’
             self.Vl()
             if self.current_token.value == "=":
@@ -371,13 +371,13 @@ class ASTParser:
 
     def Vb(self):
         # Vb -> ’<IDENTIFIER>’
-        if self.current_token.value == "<IDENTIFIER>":
+        if self.current_token.type == "<IDENTIFIER>":
             self.read("<IDENTIFIER>")
-            self.buildTree("<IDENTIFIER>", 0)
+            self.buildTree(self.current_token.value, 0)
         elif self.current_token.value == "(":
             self.read("(")
             # Vb -> ’(’ Vl ’)’
-            if self.current_token.value == "<IDENTIFIER>":
+            if self.current_token.type == "<IDENTIFIER>":
                 self.Vl()
                 self.read(")")
             # Vb -> ’(’ ’)’
@@ -391,14 +391,14 @@ class ASTParser:
 
     def Vl(self):
         # Vl -> ’<IDENTIFIER>’ list ’,’ => ’,’?
-        if self.current_token.value == "<IDENTIFIER>":
+        if self.current_token.type == "<IDENTIFIER>":
             self.read("<IDENTIFIER>")
-            self.buildTree("<IDENTIFIER>", 0)
+            self.buildTree(self.current_token.value, 0)
             n = 0
             while self.current_token.value == ",":
                 self.read(",")
                 self.read("<IDENTIFIER>")
-                self.buildTree("<IDENTIFIER>", 0)
+                self.buildTree(self.current_token.value, 0)
                 n += 1
             if n > 0:
                 self.buildTree(",", n + 1)
