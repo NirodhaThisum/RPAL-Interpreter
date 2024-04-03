@@ -5,10 +5,10 @@ tokens = Scanning()
 
 
 class ASTNode:
-    def __init__(self, type, value):
+    def __init__(self, type):
         self.firstChild = None
         self.sibling = None
-        self.value = value
+        self.token = None
         self.type = type  # This is the printing argument of AST node
         self.indentation = 0
 
@@ -23,10 +23,11 @@ class ASTParser:
     def read(self, value, type):
 
         self.current_token = tokens[self.index]
-        if (self.current_token.type != type) and (self.current_token.value != value):
-            print("Error: Expected " + type +
-                  " but got " + self.current_token.type)
-
+        if self.current_token.value != value:
+            print("Error: Expected " + type + " but got " + self.current_token.type)
+            print("Error: Expected " + value + "but got " + self.current_token.value)
+            return
+        currentTokenType = ""
         match type:
             case "<IDENTIFIER>":
                 currentTokenType = "<ID:" + self.current_token.value + ">"
@@ -36,25 +37,107 @@ class ASTParser:
                 currentTokenType = "<STR:" + self.current_token.value + ">"
             case "<KEYWORD>":
                 currentTokenType = self.current_token.value
+            case "<OPERATOR>":
+                currentTokenType = self.current_token.value
 
-        if self.current_token.type in ["<IDENTIFIER>", "<INTEGER>", "<STRING>"]:
-
-            currentTokenType = (
-                "<" + self.current_token.type + ":" + self.current_token.value + ">"
-            )
-            currentTokenValue = self.current_token.value
-            terminalNode = ASTNode(currentTokenType, currentTokenValue)
-            self.stack.append(terminalNode)
-
-        # if self.current_token.value in ["true", "false", "nil", "dummy"]:
-        #     stack.append(ASTNode(self.current_token.value))
-
-        # print("reading : " + str(self.current_token.value))
+        terminalNode = ASTNode(currentTokenType)
+        self.stack.append(terminalNode)
 
         # Pick the next token
         self.index += 1
         if self.index < len(self.tokens):
             self.current_token = self.tokens[self.index]
+
+    def buildTree(self, token, numOfChilds):
+        # pass the transduction grammar value as the token
+        parentNode = ASTNode(token)
+        head = None
+        for i in range(numOfChilds):
+            child = self.stack.pop()
+            child.sibling = head
+            head = child
+        parentNode.firstChild = head
+        self.stack.append(parentNode)
+
+    # Parsing Table
+
+    
+    def E(self):
+        match self.current_token.value:
+
+            # E -> ’let’ D ’in’ E
+            case "let":
+                self.read("let", "<KEYWORD>")
+                self.D()
+
+                if self.current_token.value != "in":
+                    print("Error: in is expected")
+                    return
+
+                self.read("in", "<KEYWORD>")
+                self.E()
+                print("E->let D in E")
+                numberOfTerminals = 2
+                self.buildTree("let", numberOfTerminals)
+
+
+            # -> ’fn’ Vb+ ’.’ E
+            case "fn":
+                n = 0
+                self.read("fn", "<KEYWORD>")
+
+                while (
+                    self.current_token.type == "<IDENTIFIER>"
+                    or self.current_token.value == "("
+                ):
+                    self.Vb()
+                    n += 1
+
+                if n == 0:
+                    print("E: at least one 'Vb' expected\n")
+                    return
+
+                if self.current_token.value != ".":
+                    print("Error: . is expected")
+                    return
+
+                self.read(".", "<OPERATOR>")
+                self.E()
+                print("E->fn Vb . E")
+                self.buildTree("lambda", n + 1)
+
+            case _:
+                self.Ew()
+                print("E->Ew")
+
+    def Ew(self):
+        print("Ew")
+        self.T()
+        print("Ew->T")
+        if self.current_token.value == "where":
+            self.read("where", "<KEYWORD>")
+            self.Dr()
+            print("Ew->T where Dr")
+            self.buildTree("where", 2)
+
+
+    def T(self):
+        print("T")
+        self.Ta()
+        # print('T->Ta')
+
+        n = 0
+        while self.current_token.value == ",":
+            self.read()
+            self.Ta()
+            n += 1
+            print("T->Ta , Ta")
+        if n > 0:
+            self.buildTree("tau", n + 1)
+        else:
+            print("T->Ta")
+
+    
 
     def testPrint(self):
         for token in self.stack:
@@ -65,7 +148,12 @@ myParser = ASTParser(tokens)
 # for token in myParser.tokens:
 #     print(token.value, token.type)
 
+
+myParser.current_token = tokens[0]
 numberOfTokens = len(tokens)
-for i in range(numberOfTokens):
-    myParser.read()
-myParser.testPrint()
+myParser.E()
+for i in myParser.stack:
+    print(i)
+# for i in range(numberOfTokens):
+#     myParser.read()
+# myParser.testPrint()
