@@ -175,8 +175,7 @@ def Scanning():
         if token.type != "<DELETE>":
             Tokens.append(token)
 
+    for token in Tokens:
+        print(token.value, token.type)
 
-    # for token in Tokens:
-    #     print(token.value, token.type)
-    
     return Tokens
