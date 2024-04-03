@@ -23,7 +23,8 @@ class ASTParser:
     def read(self, value, type):
 
         self.current_token = tokens[self.index]
-        if self.current_token.value != value:
+
+        if self.current_token.value != value and value != "UserDefined":
             print("Error: Expected " + type + " but got " + self.current_token.type)
             print("Error: Expected " + value + "but got " + self.current_token.value)
             return
@@ -39,6 +40,7 @@ class ASTParser:
                 currentTokenType = self.current_token.value
             case "<OPERATOR>":
                 currentTokenType = self.current_token.value
+
 
         terminalNode = ASTNode(currentTokenType)
         self.stack.append(terminalNode)
@@ -142,6 +144,28 @@ class ASTParser:
     def testPrint(self):
         for token in self.stack:
             print(token.value, token.type)
+
+    def VL(self):
+        # Vl -> ’<IDENTIFIER>’ list ’,’
+
+        if self.current_token.type == "<IDENTIFIER>":
+
+            self.read()
+            trees_to_pop = 0
+            while self.current_token.value == ',':
+                # Vl -> '<IDENTIFIER>' list ',' => ','?;
+                self.read()
+                if self.current_token.type != Tokernizer.TokenType.ID:
+                    # Replace with appropriate error handling
+                    print(" 572 VL: Identifier expected")
+                self.read()
+                print('VL->id , ?')
+
+                trees_to_pop += 1
+            print('498')
+            if trees_to_pop > 0:
+                # +1 for the first identifier
+                self.buildTree(',', trees_to_pop + 1)
 
 
 myParser = ASTParser(tokens)
