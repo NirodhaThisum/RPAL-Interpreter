@@ -21,7 +21,22 @@ class ASTParser:
         self.stack = []
 
     def read(self, value, type):
+
         self.current_token = tokens[self.index]
+        if (self.current_token.type != type) and (self.current_token.value != value):
+            print("Error: Expected " + type +
+                  " but got " + self.current_token.type)
+
+        match type:
+            case "<IDENTIFIER>":
+                currentTokenType = "<ID:" + self.current_token.value + ">"
+            case "<INTEGER>":
+                currentTokenType = "<INT:" + self.current_token.value + ">"
+            case "<STRING>":
+                currentTokenType = "<STR:" + self.current_token.value + ">"
+            case "<KEYWORD>":
+                currentTokenType = self.current_token.value
+
         if self.current_token.type in ["<IDENTIFIER>", "<INTEGER>", "<STRING>"]:
 
             currentTokenType = (
