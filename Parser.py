@@ -91,63 +91,63 @@ class ASTParser:
 
 
     def Ew(self):
-        T()  # E -> T
+        self.T()  # E -> T
         # Ew -> T ’where’ Dr => ’where’
         if self.current_token.value == "where":
             self.read("where")
-            Dr()
+            self.Dr()
             self.buildTree("where", 2)
 
 
     def T(self):
-        Ta()  # E -> Ta
+        self.Ta()  # E -> Ta
         # T -> Ta ( ’,’ Ta )+ => ’tau’
         if self.current_token.value == ",":
             self.read(",")
-            Ta()
+            self.Ta()
             n = 1  # track the number pf repitition
             while self.current_token.value == ",":
                 n += 1
                 self.read(",")
-                Ta()
+                self.Ta()
             self.buildTree("tau", n + 1)
 
 
     def Ta(self):
-        Tc()  # E -> Tc
+        self.Tc()  # E -> Tc
         # Ta -> Ta ’aug’ Tc => ’aug’
         while self.current_token.value == "aug":
             self.read("aug")
-            Tc()
+            self.Tc()
             self.buildTree("aug", 2)
 
 
     def Tc(self):
-        B()  # E -> B
+        self.B()  # E -> B
         # Tc -> B ’->’ Tc ’|’ Tc => ’->’
         if self.current_token.value == "->":
             self.read("->")
-            Tc()
+            self.Tc()
             self.read("|")
-            Tc()
+            self.Tc()
             self.buildTree("->", 3)
 
 
     def B(self):
-        Bt()  # E -> Bt
+        self.Bt()  # E -> Bt
         # B ->B’or’ Bt => ’or’
         while self.current_token.value == "or":
             self.read("or")
-            Bt()
+            self.Bt()
             self.buildTree("or", 2)
 
 
     def Bt(self):
-        Bs()  # E -> Bs
+        self.Bs()  # E -> Bs
         # Bt -> Bt ’&’ Bs => ’&’
         while self.current_token.value == "&":
             self.read("&")
-            Bs()
+            self.Bs()
             self.buildTree("&", 2)
 
 
@@ -155,44 +155,44 @@ class ASTParser:
         # Bs -> ’not’ Bp => ’not’
         if self.current_token.value == "not":
             self.read("not")
-            Bp()
+            self.Bp()
             self.buildTree("not", 1)
         else:
             # E -> Bp
-            Bp()
+            self.Bp()
 
 
     def Bp(self):
-        A()  # E -> A
+        self.A()  # E -> A
         # Bp -> A (’gr’ | ’>’ ) A => ’gr’
         if self.current_token.value in ["gr", ">"]:
             self.read(self.current_token.value)
-            A()
+            self.A()
             self.buildTree("gr", 2)
         # Bp -> A (’ge’ | ’>=’) A => ’ge’
         elif self.current_token.value in ["ge", ">="]:
             self.read(self.current_token.value)
-            A()
+            self.A()
             self.buildTree("ge", 2)
         # Bp -> A (’ls’ | ’<’ ) A => ’ls’
         elif self.current_token.value in ["ls", "<"]:
             self.read(self.current_token.value)
-            A()
+            self.A()
             self.buildTree("ls", 2)
         # Bp -> A (’le’ | ’<=’) A => ’le’
         elif self.current_token.value in ["le", "<="]:
             self.read(self.current_token.value)
-            A()
+            self.A()
             self.buildTree("le", 2)
         # Bp -> A ’eq’ A => ’eq’
         elif self.current_token.value == "eq":
             self.read(self.current_token.value)
-            A()
+            self.A()
             self.buildTree("eq", 2)
         # Bp -> A ’ne’ A => ’ne’
         elif self.current_token.value == "ne":
             self.read(self.current_token.value)
-            A()
+            self.A()
             self.buildTree("ne", 2)
 
 
@@ -200,64 +200,64 @@ class ASTParser:
         # A -> ’+’ At
         if self.current_token.value == "+":
             self.read("+")
-            At()
+            self.At()
         # A -> ’-’ At => ’neg’
         elif self.current_token.value == "-":
             self.read("-")
-            At()
+            self.At()
             self.buildTree("neg", 1)
         else:
-            At()  # A -> At
+            self.At()  # A -> At
             while self.current_token.value in ["+", "-"]:
                 # A ->A’+’ At => ’+’
                 if self.current_token.value == "+":
                     self.read("+")
-                    At()
+                    self.At()
                     self.buildTree("+", 2)
                 # A -> A ’-’ At => ’-’
                 elif self.current_token.value == "-":
                     self.read("-")
-                    At()
+                    self.At()
                     self.buildTree("-", 2)
 
 
     def At(self):
-        Af()  # A -> Af
+        self.Af()  # A -> Af
         while self.current_token.value in ["*", "/"]:
             # At -> At ’*’ Af => ’*’
             if self.current_token.value == "*":
                 self.read("*")
-                Af()
+                self.Af()
                 self.buildTree("*", 2)
             # At -> At ’/’ Af => ’/’
             elif self.current_token.value == "/":
                 self.read("/")
-                Af()
+                self.Af()
                 self.buildTree("/", 2)
 
 
     def Af(self):
-        Ap()  # Af -> Ap
+        self.Ap()  # Af -> Ap
         # Af -> Ap ’**’ Af => ’**’
         if self.current_token.value == "**":
             self.read("**")
-            Af()
+            self.Af()
             self.buildTree("**", 2)
 
 
     def Ap(self):
-        R()  # Ap -> R
+        self.R()  # Ap -> R
         # Ap -> Ap ’@’ ’<IDENTIFIER>’ R => ’@’
         while self.current_token.value == "@":
             self.read("@")
             self.read("<IDENTIFIER>")
             self.buildTree("<IDENTIFIER>", 0)
-            R()
+            self.R()
             self.buildTree("@", 2)
 
 
     def R(self):
-        Rn()  # R -> Rn
+        self.Rn()  # R -> Rn
         # R ->R Rn => ’gamma’
         while self.current_token.value in [
             "<IDENTIFIER>",
@@ -269,7 +269,7 @@ class ASTParser:
             "(",
             "dummy",
         ]:
-            Rn()
+            self.Rn()
             self.buildTree("gamma", 2)
 
 
@@ -289,7 +289,7 @@ class ASTParser:
         # Rn -> ’true’ => ’true’
         elif self.current_token.value == "true":
             self.read("true")
-            self.buildTree("true", 0)
+            self.vbuildTree("true", 0)
         # Rn -> ’false’ => ’false’
         elif self.current_token.value == "false":
             self.read("false")
@@ -301,7 +301,7 @@ class ASTParser:
         # Rn -> ’(’ E ’)’
         elif self.current_token.value == "(":
             self.read("(")
-            E()
+            self.E()
             self.read(")")
         # Rn -> ’dummy’ => ’dummy’
         elif self.current_token.value == "dummy":
@@ -310,21 +310,21 @@ class ASTParser:
 
 
     def D(self):
-        Da()  # D -> Da
+        self.Da()  # D -> Da
         # D -> Da ’within’ D => ’within’
         while self.current_token.value == "within":
             self.read("within")
-            D()
+            self.D()
             self.buildTree("within", 2)
 
 
     def Da(self):
-        Dr()  # Da -> Dr
+        self.Dr()  # Da -> Dr
         n = 0  # keep track of repitation of Dr
         # Da -> Dr ( ’and’ Dr )+ => ’and’
         while self.current_token.value == "and":
             self.read("and")
-            Dr()
+            self.Dr()
             n += 1
         if n > 0:
             self.buildTree("and", n + 1)
@@ -334,39 +334,39 @@ class ASTParser:
         # Dr -> ’rec’ Db => ’rec’
         if self.current_token.value == "rec":
             self.read("rec")
-            Db()
+            self.Db()
             self.buildTree("rec", 1)
         else:
             # Dr -> Db
-            Db()
+            self.Db()
 
 
     def Db(self):
         # Db -> ’(’ D ’)’
         if self.current_token.value == "(":
             self.read("(")
-            D()
+            self.D()
             self.read(")")
             n = 0
         if self.current_token.value == "<IDENTIFIER>":
             # Db -> Vl ’=’ E => ’=’
-            Vl()
+            self.Vl()
             if self.current_token.value == "=":
                 self.read("=")
-                E()
+                self.E()
                 self.buildTree("=", 2)
             else:
                 # Db-> ’<IDENTIFIER>’ Vb+ ’=’ E => ’fcn_form’
-                Vb()
+                self.Vb()
                 n = 1
                 while self.current_token.value in ["<IDENTIFIER>", "("]:
-                    Vb()
+                    self.Vb()
                     n += 1
                 self.read("=")
-                E()
+                self.E()
                 self.buildTree("fcn_form", n + 2)
-        else:
-            print("Error:error occurs near", Next_Token, " '(' or IDENTIFIER expected.")
+        # else:
+        #     print("Error:error occurs near", Next_Token, " '(' or IDENTIFIER expected.")
 
 
     def Vb(self):
@@ -378,15 +378,15 @@ class ASTParser:
             self.read("(")
             # Vb -> ’(’ Vl ’)’
             if self.current_token.value == "<IDENTIFIER>":
-                Vl()
+                self.Vl()
                 self.read(")")
             # Vb -> ’(’ ’)’
             else:
                 self.read(")")
                 self.buildTree("()", 0)
-        else:
+        # else:
             # Handle Error
-            print("Error:error occurs near", Next_Token, " .IDENTIFIER or ')' expected.")
+            # print("Error:error occurs near", Next_Token, " .IDENTIFIER or ')' expected.")
 
 
     def Vl(self):
@@ -402,9 +402,9 @@ class ASTParser:
                 n += 1
             if n > 0:
                 self.buildTree(",", n + 1)
-        else:
-            # handle error
-            print("Error:error occurs near ", Next_Token, " .IDENTIFIER expected.")    
+        # else:
+        #     # handle error
+        #     print("Error:error occurs near ", Next_Token, " .IDENTIFIER expected.")
 
 '''
     # Expressions
