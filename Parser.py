@@ -27,6 +27,7 @@ class ASTParser:
             print("Error: Expected " + type + " but got " + self.current_token.type)
             print("Error: Expected " + value + "but got " + self.current_token.value)
             return
+        
         currentTokenType = ""
         match type:
             case "<IDENTIFIER>":
@@ -61,7 +62,7 @@ class ASTParser:
 
     # Parsing Table
 
-    
+    # Expressions
     def E(self):
         match self.current_token.value:
 
@@ -79,7 +80,6 @@ class ASTParser:
                 print("E->let D in E")
                 numberOfTerminals = 2
                 self.buildTree("let", numberOfTerminals)
-
 
             # -> ’fn’ Vb+ ’.’ E
             case "fn":
@@ -121,23 +121,26 @@ class ASTParser:
             self.buildTree("where", 2)
 
 
+    # Tuple Expressions
+            
     def T(self):
+
         print("T")
         self.Ta()
         # print('T->Ta')
 
         n = 0
         while self.current_token.value == ",":
-            self.read()
+            self.read(",", "<OPERATOR>")
             self.Ta()
             n += 1
             print("T->Ta , Ta")
+
         if n > 0:
             self.buildTree("tau", n + 1)
+
         else:
             print("T->Ta")
-
-    
 
     def testPrint(self):
         for token in self.stack:
