@@ -1,5 +1,3 @@
-class MyCustomError(Exception):
-    pass
 
 
 class Token:
@@ -8,173 +6,196 @@ class Token:
         self.type = type
 
 
-number_of_Tokens = 0
+class RPAL_Scanner:
+    punction = [")", "(", ";", ","]
 
-punction = [")", "(", ";", ","]
-
-operator_symbol = [
-    "+",
-    "-",
-    "*",
-    "<",
-    ">",
-    "&",
-    ".",
-    "@",
-    "/",
-    ":",
-    "=",
-    "~",
-    "|",
-    "$",
-    "!",
-    "#",
-    "%",
-    "^",
-    "_",
-    "[",
-    "]",
-    "{",
-    "}",
-    '"',
-    "`",
-    "?",
-]
-
-
-comment_elements = ['"', "\\", " ", "\t"]
+    operator_symbol = [
+        "+",
+        "-",
+        "*",
+        "<",
+        ">",
+        "&",
+        ".",
+        "@",
+        "/",
+        ":",
+        "=",
+        "~",
+        "|",
+        "$",
+        "!",
+        "#",
+        "%",
+        "^",
+        "_",
+        "[",
+        "]",
+        "{",
+        "}",
+        '"',
+        "`",
+        "?",
+    ]
 
 
-Input_Tokens = []
+    RESERVED_KEYWORDS = [
+        "fn",
+        "where",
+        "let",
+        "aug",
+        "within",
+        "in",
+        "rec",
+        "eq",
+        "gr",
+        "ge",
+        "ls",
+        "le",
+        "ne",
+        "or",
+        "@",
+        "not",
+        "&",
+        "true",
+        "false",
+        "nil",
+        "dummy",
+        "and",
+        "|",
+    ]
 
-with open("RPAL.txt", "r") as f:
-    inputString = f.read()
-    # print(inputString)
+    comment_elements = ['"', "\\", " ", "\t"]
 
-    i = 0
-    while i < len(inputString):
+    def __init__(self, file):
+        self.file = file
 
-        if inputString[i].isalpha():
-            temp = i
-            while i + 1 < len(inputString) and (
-                (inputString[i + 1].isalpha())
-                or (inputString[i + 1].isdigit())
-                or (inputString[i + 1] == "_")
-            ):
+    # Scannning
+    def Scanning(self):
+        Input_Tokens = []
+        with open(self.file, "r") as f:
+            inputString = f.read()
+
+            i = 0
+            while i < len(inputString):
+
+                if inputString[i].isalpha():
+                    temp = i
+                    while i + 1 < len(inputString) and (
+                        (inputString[i + 1].isalpha())
+                        or (inputString[i + 1].isdigit())
+                        or (inputString[i + 1] == "_")
+                    ):
+                        i += 1
+                    token = inputString[temp : i + 1]
+                    if token in RPAL_Scanner.RESERVED_KEYWORDS:
+                        Input_Tokens.append(Token(token, token))
+                    else:
+                        Input_Tokens.append(Token(token, "<IDENTIFIER>"))
+
+                elif inputString[i].isdigit():
+                    temp = i
+                    while i + 1 < len(inputString) and inputString[i + 1].isdigit():
+                        i += 1
+                    token = inputString[temp : i + 1]
+                    Input_Tokens.append(Token(token, "<INTEGER>"))
+
+                elif (
+                    inputString[i] == " "
+                    or inputString[i] == "\t"
+                    or inputString[i] == "\n"
+                ):
+                    temp = i
+                    while i + 1 < len(inputString) and (
+                        inputString[i + 1] == " "
+                        or inputString[i + 1] == "\t"
+                        or inputString[i + 1] == "\n"
+                    ):
+                        i += 1
+                    token = inputString[temp : i + 1]
+                    Input_Tokens.append(Token(repr(token), "<DELETE>"))
+
+                elif inputString[i] == "(":
+                    token = "("
+                    Input_Tokens.append(Token("(", "("))
+
+                elif inputString[i] == ")":
+                    token = ")"
+                    Input_Tokens.append(Token(")", ")"))
+
+                elif inputString[i] == ";":
+                    token = ";"
+                    Input_Tokens.append(Token(";", ";"))
+
+                elif inputString[i] == ",":
+                    token = ","
+                    Input_Tokens.append(Token(",", ","))
+
+                elif inputString[i] == "'":
+                    temp = i
+                    while (
+                        i + 1 < len(inputString)
+                        and (
+                            inputString[i + 1] == "\t"
+                            or inputString[i + 1] == "\n"
+                            or inputString[i + 1] == "\\"
+                            or inputString[i + 1] == "("
+                            or inputString[i + 1] == ")"
+                            or inputString[i + 1] == ";"
+                            or inputString[i + 1] == ","
+                            or inputString[i + 1] == " "
+                            or inputString[i + 1].isalpha()
+                            or inputString[i + 1].isdigit()
+                            or inputString[i + 1] in RPAL_Scanner.operator_symbol
+                        )
+                        and inputString[i + 1] != "'"
+                    ):
+                        i += 1
+                    if i + 1 < len(inputString) and inputString[i + 1] == "'":
+                        i += 1
+                        token = inputString[temp + 1 : i]   #without ' ' marks
+                        Input_Tokens.append(Token(token, "<STRING>"))
+
+                elif (
+                    inputString[i] == "/"
+                    and (i + 1 < len(inputString))
+                    and inputString[i + 1] == "/"
+                ):
+                    temp = i
+                    while i + 1 < len(inputString) and (
+                        (inputString[i + 1] in RPAL_Scanner.comment_elements)
+                        or inputString[i + 1] in RPAL_Scanner.punction
+                        or inputString[i + 1].isalpha()
+                        or inputString[i + 1].isdigit()
+                        or inputString[i + 1] in RPAL_Scanner.operator_symbol
+                        and (not (inputString[i + 1] == "\n"))
+                    ):
+                        i += 1
+
+                    if i + 1 < len(inputString) and inputString[i + 1] == "\n":
+                        i += 1
+                        # token = inputString[temp : i + 1]   #with last newline
+                        token = inputString[temp:i]  # without newline
+                        Input_Tokens.append(Token(token, "<DELETE>"))
+
+
+                elif inputString[i] in RPAL_Scanner.operator_symbol:
+                    temp = i
+                    while (
+                        i + 1 < len(inputString) and inputString[i + 1] in RPAL_Scanner.operator_symbol
+                    ):
+                        i += 1
+                    token = inputString[temp : i + 1]
+                    Input_Tokens.append(Token(token, "<OPERATOR>"))
+
                 i += 1
-            token = inputString[temp : i + 1]
-            Input_Tokens.append(Token(token, "<IDENTIFIER>"))
-
-        elif inputString[i].isdigit():
-            temp = i
-            while i + 1 < len(inputString) and inputString[i + 1].isdigit():
-                i += 1
-            token = inputString[temp : i + 1]
-            Input_Tokens.append(Token(token, "<INTEGER>"))
-
-        elif inputString[i] == " " or inputString[i] == "\t" or inputString[i] == "\n":
-            temp = i
-            while i + 1 < len(inputString) and (
-                inputString[i + 1] == " "
-                or inputString[i + 1] == "\t"
-                or inputString[i + 1] == "\n"
-            ):
-                i += 1
-            token = inputString[temp : i + 1]
-            Input_Tokens.append(Token(repr(token), "<DELETE>"))
-
-        elif inputString[i] == "(":
-            token = "("
-            Input_Tokens.append(Token("(", "("))
-
-        elif inputString[i] == ")":
-            token = ")"
-            Input_Tokens.append(Token(")", ")"))
-
-        elif inputString[i] == ";":
-            token = ";"
-            Input_Tokens.append(Token(";", ";"))
-
-        elif inputString[i] == ",":
-            token = ","
-            Input_Tokens.append(Token(",", ","))
-
-        elif inputString[i] == '"':
-            temp = i
-            while (
-                i + 1 < len(inputString)
-                and (
-                    inputString[i + 1] == "\t"
-                    or inputString[i + 1] == "\n"
-                    or inputString[i + 1] == "\\"
-                    or inputString[i + 1] == "("
-                    or inputString[i + 1] == ")"
-                    or inputString[i + 1] == ";"
-                    or inputString[i + 1] == ","
-                    or inputString[i + 1] == " "
-                    or inputString[i + 1].isalpha()
-                    or inputString[i + 1].isdigit()
-                    or inputString[i + 1] in operator_symbol
-                )
-                and inputString[i + 1] != '"'
-            ):
-                i += 1
-            if i + 1 < len(inputString) and inputString[i + 1] == '"':
-                i += 1
-                token = inputString[temp : i + 1]
-                Input_Tokens.append(Token(token, "<STRING>"))
-
-            else:
-                raise MyCustomError('need " ')
-
-        elif (
-            inputString[i] == "/"
-            and (i + 1 < len(inputString))
-            and inputString[i + 1] == "/"
-        ):
-            temp = i
-            while i + 1 < len(inputString) and (
-                (inputString[i + 1] in comment_elements)
-                or inputString[i + 1] in punction
-                or inputString[i + 1].isalpha()
-                or inputString[i + 1].isdigit()
-                or inputString[i + 1] in operator_symbol
-                and (not (inputString[i + 1] == "\n"))
-            ):
-                i += 1
 
 
-            if i + 1 < len(inputString) and inputString[i + 1] == "\n":
-                i += 1
-                # token = inputString[temp : i + 1]   #with last newline
-                token = inputString[temp:i]  # without newline
-                Input_Tokens.append(Token(token, "<DELETE>"))
+        # Screening
+        Tokens = []
 
-            else:
-                raise MyCustomError("need to end with newline")
+        for token in Input_Tokens:
+            if token.type != "<DELETE>":
+                Tokens.append(token)
 
-        elif inputString[i] in operator_symbol:
-            temp = i
-            while i + 1 < len(inputString) and inputString[i + 1] in operator_symbol:
-                i += 1
-            token = inputString[temp : i + 1]
-            Input_Tokens.append(Token(token, "<OPERATOR>"))
-
-        i += 1
-
-
-# for token in Input_Tokens:
-#     print(token.value, token.type)
-
-
-# Screening
-Tokens = []
-
-for token in Input_Tokens:
-    if token.type != "<DELETE>":
-        Tokens.append(token)
-
-
-for token in Tokens:
-    print(token.value, token.type)
-
+        return Tokens
