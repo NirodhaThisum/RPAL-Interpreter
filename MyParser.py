@@ -1,434 +1,480 @@
 class Token:
-    def __init__(self):
-        self.type = ""
-        self.val = ""
-
-    # Set type of token
-    def setType(self, sts):
-        self.type = sts
-
-    # Set value of token
-    def setVal(self, str):
-        self.val = str
-
-    # Get type of token
-    def getType(self):
-        return self.type
-
-    # Get value of token
-    def getVal(self):
-        return self.val
-
-    # Define inequality operator
-    def __ne__(self, t):
-        return self.type != t.type
-
-binary_operators = ["+", "-", "*", "/", "**", "gr", "ge", "<",
-                    "<=", ">", ">=", "ls", "le", "eq", "ne", "&", "or", "><"]
-
-
-class tree:
-    def __init__(self):
-        self.value = None   # Value of node
-        self.type = None  # Type of node
-        self.left = None  # Left child
-        self.right = None  # Right child
-
-    # Set type of node
-    def setType(self, typ):
-        self.type = typ
-
-    # Set value of node
-    def setVal(self, value):
+    def __init__(self, value, type):
         self.value = value
+        self.type = type
 
-    # Get type of node
-    def getType(self):
-        return self.type
+number_of_Tokens = 0
+punction = [")", "(", ";", ","]
+operator_symbol = ["+", "-", "*", "<", ">", "&", ".", "@", "/", ":", "=",
+                   "~", "|", "$", "!", "#", "%", "^", "_", "[", "]", "{", "}", '"', "`", "?"]
+comment_elements = ['"', "\\", " ", "\t"]
+keywords = ["let", "lambda", "where", "tau", "aug", "->", "or", "&", "not", "gr", "ge", "ls", "le", "eq", "ne", "+",
+            "-", "neg", "*", "/", "**", "@", "gamma", "true", "false", "nil", "dummy", "within", "and", "rec", "=", "fcn_form"]
+Input_Tokens = []
+tokens = []
 
-    # Get value of node
-    def getVal(self):
-        return self.value
+def Scanning():
+    with open("RPAL.txt", "r") as f:
+        inputString = f.read()
+        # print(inputString)
 
-    # Create node with value and type
-    @staticmethod
-    def createNode(value, typ):
-        t = tree()
-        t.setVal(value)
-        t.setType(typ)
-        t.left = None
-        t.right = None
-        return t
+        i = 0
+        while i < len(inputString):
 
-    # Create node with tree object
-    @staticmethod
-    def createNodeFromTree(x):
-        t = tree()
-        t.setVal(x.getVal())
-        t.setType(x.getType())
-        t.left = x.left
-        t.right = None
-        return t
+            if inputString[i].isalpha():
+                temp = i
+                while i + 1 < len(inputString) and (
+                    (inputString[i + 1].isalpha())
+                    or (inputString[i + 1].isdigit())
+                    or (inputString[i + 1] == "_")
+                ):
+                    i += 1
+                token = inputString[temp : i + 1]
+                if token in keywords:
+                    Input_Tokens.append(Token(token, token))
+                else:
+                    Input_Tokens.append(Token(token, "<IDENTIFIER>"))
 
-    # Print syntax tree
-    def print_tree(self, no_of_dots):
+            elif inputString[i].isdigit():
+                temp = i
+                while i + 1 < len(inputString) and inputString[i + 1].isdigit():
+                    i += 1
+                token = inputString[temp : i + 1]
+                Input_Tokens.append(Token(token, "<INTEGER>"))
+
+            elif inputString[i] == " " or inputString[i] == "\t" or inputString[i] == "\n":
+                temp = i
+                while i + 1 < len(inputString) and (
+                    inputString[i + 1] == " "
+                    or inputString[i + 1] == "\t"
+                    or inputString[i + 1] == "\n"
+                ):
+                    i += 1
+                token = inputString[temp : i + 1]
+                Input_Tokens.append(Token(repr(token), "<DELETE>"))
+
+            elif inputString[i] == "(":
+                token = "("
+                Input_Tokens.append(Token("(", "("))
+
+            elif inputString[i] == ")":
+                token = ")"
+                Input_Tokens.append(Token(")", ")"))
+
+            elif inputString[i] == ";":
+                token = ";"
+                Input_Tokens.append(Token(";", ";"))
+
+            elif inputString[i] == ",":
+                token = ","
+                Input_Tokens.append(Token(",", ","))
+
+            elif inputString[i] == '"':
+                temp = i
+                while (
+                    i + 1 < len(inputString)
+                    and (
+                        inputString[i + 1] == "\t"
+                        or inputString[i + 1] == "\n"
+                        or inputString[i + 1] == "\\"
+                        or inputString[i + 1] == "("
+                        or inputString[i + 1] == ")"
+                        or inputString[i + 1] == ";"
+                        or inputString[i + 1] == ","
+                        or inputString[i + 1] == " "
+                        or inputString[i + 1].isalpha()
+                        or inputString[i + 1].isdigit()
+                        or inputString[i + 1] in operator_symbol
+                    )
+                    and inputString[i + 1] != '"'
+                ):
+                    i += 1
+                if i + 1 < len(inputString) and inputString[i + 1] == '"':
+                    i += 1
+                    token = inputString[temp : i + 1]
+                    Input_Tokens.append(Token(token, "<STRING>"))
+            elif (
+                inputString[i] == "/"
+                and (i + 1 < len(inputString))
+                and inputString[i + 1] == "/"
+            ):
+                temp = i
+                while i + 1 < len(inputString) and (
+                    (inputString[i + 1] in comment_elements)
+                    or inputString[i + 1] in punction
+                    or inputString[i + 1].isalpha()
+                    or inputString[i + 1].isdigit()
+                    or inputString[i + 1] in operator_symbol
+                    and (not (inputString[i + 1] == "\n"))
+                ):
+                    i += 1
+
+                if i + 1 < len(inputString) and inputString[i + 1] == "\n":
+                    i += 1
+                    # token = inputString[temp : i + 1]   #with last newline
+                    token = inputString[temp:i]  # without newline
+                    Input_Tokens.append(Token(token, "<DELETE>"))
+
+            elif inputString[i] in operator_symbol:
+                temp = i
+                while i + 1 < len(inputString) and inputString[i + 1] in operator_symbol:
+                    i += 1
+                token = inputString[temp : i + 1]
+                Input_Tokens.append(Token(token, token))
+
+            i += 1
+
+    # for token in Input_Tokens:
+    #     print(token.value, token.type)
+
+    # Screening
+    Tokens = []
+
+    for token in Input_Tokens:
+        if token.type != "<DELETE>":
+            Tokens.append(token)
+
+    for token in Tokens:
+        tokens.append((token.type, token.value))
+    return Tokens
+
+def Read(token):
+    global next_token_of_type
+    global current_token
+    global next_token
+
+    if len(tokens) == 0:
+        return
+
+    if token == next_token_of_type:
+        if token in ["<IDENTIFIER>", "<INTEGER>", "<STRING>"]:
+            current_token = next_token
+        next_token_of_type, next_token = tokens.pop(0)
+
+def Build_Tree(token_type, children_count):
+
+    if token_type in ["<IDENTIFIER>", "<INTEGER>", "<STRING>"]:
+        if token_type == "<IDENTIFIER>":
+            Token = "<ID:" + current_token + ">"
+        if token_type == "<INTEGER>":
+            Token = "<INT:" + str(current_token) + ">"
+        if token_type == "<STRING>":
+            Token = "<STR:" + current_token + ">"
+        ast.append((Token, children_count))
+    else:
+        ast.append((token_type, children_count))
+
+def Generate_Tree():
+    global ast
+    Postorder_AST = ast.copy()
+    Postorder_AST.reverse()
+
+    Preorder_AST = [None]
+    current_index = 0
+    current_depth = 0
+
+    for node in Postorder_AST:
+        child_count = node[1]
+        token_val = node[0]
+
+        Preorder_AST[current_index] = "." * current_depth + token_val
+        current_depth += 1
+
+        for j in range(child_count):
+            current_index += 1
+            Preorder_AST.insert(current_index, None)
+
+        if child_count == 0:
+            current_depth -= 1
+            current_index -= 1
+            while Preorder_AST[current_index] is not None and current_index > -1:
+                current_depth -= 1
+                current_index -= 1
+
+    return Preorder_AST
+
+def Print_AST():
+    Preorder_AST = Generate_Tree()
+    for node in Preorder_AST:
+        print(node)
+
+def Procedure_E():
+    if next_token_of_type == "let":
+        Read("let")
+        Procedure_D()
+        Read("in")
+        Procedure_E()
+        Build_Tree("let", 2)
+    elif next_token_of_type == "fn":
+        Read("fn")
+        Procedure_Vb()
+        n = 1
+        while next_token_of_type in ["<IDENTIFIER>", "("]:
+            Procedure_Vb()
+            n += 1
+        Read(".")
+        Procedure_E()
+        Build_Tree("lambda", n + 1)
+    else:
+        Procedure_Ew()
+
+def Procedure_Ew():
+    Procedure_T()
+    if next_token_of_type == "where":
+        Read("where")
+        Procedure_Dr()
+        Build_Tree("where", 2)
+
+def Procedure_T():
+    Procedure_Ta()
+    if next_token_of_type == ",":
+        Read(",")
+        Procedure_Ta()
+        n = 1
+        while next_token_of_type == ",":
+            n += 1
+            Read(",")
+            Procedure_Ta()
+        Build_Tree("tau", n + 1)
+
+def Procedure_Ta():
+    Procedure_Tc()
+    while next_token_of_type == "aug":
+        Read("aug")
+        Procedure_Tc()
+        Build_Tree("aug", 2)
+
+def Procedure_Tc():
+    Procedure_B()
+    if next_token_of_type == "->":
+        Read("->")
+        Procedure_Tc()
+        Read("|")
+        Procedure_Tc()
+        Build_Tree("->", 3)
+
+def Procedure_B():
+    Procedure_Bt()
+    while next_token_of_type == "or":
+        Read("or")
+        Procedure_Bt()
+        Build_Tree("or", 2)
+
+def Procedure_Bt():
+    Procedure_Bs()
+    while next_token_of_type == "&":
+        Read("&")
+        Procedure_Bs()
+        Build_Tree("&", 2)
+
+
+def Procedure_Bs():
+    if next_token_of_type == "not":
+        Read("not")
+        Procedure_Bp()
+        Build_Tree("not", 1)
+    else:
+        Procedure_Bp()
+
+def Procedure_Bp():
+    Procedure_A()
+    match next_token_of_type:
+        case "gr" | ">":
+            Read(next_token_of_type)
+            Procedure_A()
+            Build_Tree("gr", 2)
+        case "ge" | ">=":
+            Read(next_token_of_type)
+            Procedure_A()
+            Build_Tree("ge", 2)
+        case "ls" | "<":
+            Read(next_token_of_type)
+            Procedure_A()
+            Build_Tree("ls", 2)
+        case "le" | "<=":
+            Read(next_token_of_type)
+            Procedure_A()
+            Build_Tree("le", 2)
+        case "eq":
+            Read(next_token_of_type)
+            Procedure_A()
+            Build_Tree("eq", 2)
+        case "ne":
+            Read(next_token_of_type)
+            Procedure_A()
+            Build_Tree("ne", 2)
+
+def Procedure_A():
+    if next_token_of_type == "+":
+        Read("+")
+        Procedure_At()
+    elif next_token_of_type == "-":
+        Read("-")
+        Procedure_At()
+        Build_Tree("neg", 1)
+    else:
+        Procedure_At()
+        while next_token_of_type in ["+", "-"]:
+            if next_token_of_type == "+":
+                Read("+")
+                Procedure_At()
+                Build_Tree("+", 2)
+            elif next_token_of_type == "-":
+                Read("-")
+                Procedure_At()
+                Build_Tree("-", 2)
+
+def Procedure_At():
+    Procedure_Af()
+    while next_token_of_type in ["*", "/"]:
+        if next_token_of_type == "*":
+            Read("*")
+            Procedure_Af()
+            Build_Tree("*", 2)
+        elif next_token_of_type == "/":
+            Read("/")
+            Procedure_Af()
+            Build_Tree("/", 2)
+
+def Procedure_Af():
+    Procedure_Ap()
+    if next_token_of_type == "":
+        Read("")
+        Procedure_Af()
+        Build_Tree("", 2)
+
+def Procedure_Ap():
+    Procedure_R()
+    while next_token_of_type == "@":
+        Read("@")
+        Read("<IDENTIFIER>")
+        Build_Tree("<IDENTIFIER>", 0)
+        Procedure_R()
+        Build_Tree("@", 2)
+
+def Procedure_R():
+    Procedure_Rn()
+    while next_token_of_type in ["<IDENTIFIER>", "<INTEGER>", "<STRING>", "true", "false", "nil", "(", "dummy"]:
+        Procedure_Rn()
+        Build_Tree("gamma", 2)
+
+def Procedure_Rn():
+    match next_token_of_type:
+        case "<IDENTIFIER>":
+            Read("<IDENTIFIER>")
+            Build_Tree("<IDENTIFIER>", 0)
+        case "<INTEGER>":
+            Read("<INTEGER>")
+            Build_Tree("<INTEGER>", 0)
+        case "<STRING>":
+            Read("<STRING>")
+            Build_Tree("<STRING>", 0)
+        case "true":
+            Read("true")
+            Build_Tree("true", 0)
+        case "false":
+            Read("false")
+            Build_Tree("false", 0)
+        case "nil":
+            Read("nil")
+            Build_Tree("nil", 0)
+        case "(":
+            Read("(")
+            Procedure_E()
+            Read(")")
+        case "dummy":
+            Read("dummy")
+            Build_Tree("dummy", 0)
+
+def Procedure_D():
+    Procedure_Da()
+    while next_token_of_type == "within":
+        Read("within")
+        Procedure_D()
+        Build_Tree("within", 2)
+
+def Procedure_Da():
+    Procedure_Dr()
+    n = 0
+    while next_token_of_type == "and":
+        Read("and")
+        Procedure_Dr()
+        n += 1
+    if n > 0:
+        Build_Tree("and", n + 1)
+
+
+def Procedure_Dr():
+    if next_token_of_type == "rec":
+        Read("rec")
+        Procedure_Db()
+        Build_Tree("rec", 1)
+    else:
+        Procedure_Db()
+
+
+def Procedure_Db():
+    if next_token_of_type == "(":
+        Read("(")
+        Procedure_D()
+        Read(")")
         n = 0
-        while n < no_of_dots:
-            print(".", end="")
+    if next_token_of_type == "<IDENTIFIER>":
+        Procedure_Vl()
+        if next_token_of_type == "=":
+            Read("=")
+            Procedure_E()
+            Build_Tree("=", 2)
+        else:
+            Procedure_Vb()
+            n = 1
+            while next_token_of_type in ["<IDENTIFIER>", "("]:
+                Procedure_Vb()
+                n += 1
+            Read("=")
+            Procedure_E()
+            Build_Tree("fcn_form", n + 2)
+
+
+def Procedure_Vb():
+    if next_token_of_type == "<IDENTIFIER>":
+        Read("<IDENTIFIER>")
+        Build_Tree("<IDENTIFIER>", 0)
+    elif next_token_of_type == "(":
+        Read("(")
+        if next_token_of_type == "<IDENTIFIER>":
+            Procedure_Vl()
+            Read(")")
+        else:
+            Read(")")
+            Build_Tree("()", 0)
+    else:
+        print("Error:error occurs near", next_token,
+              " .IDENTIFIER or ')' expected.")
+
+def Procedure_Vl():
+    if next_token_of_type == "<IDENTIFIER>":
+        Read("<IDENTIFIER>")
+        Build_Tree("<IDENTIFIER>", 0)
+        n = 0
+        while next_token_of_type == ",":
+            Read(",")
+            Read("<IDENTIFIER>")
+            Build_Tree("<IDENTIFIER>", 0)
             n += 1
-
-        # If node type is ID, STR, or INT, print <type:val>
-        if self.type == "ID" or self.type == "STR" or self.type == "INT":
-            print("<", end="")
-            print(self.type, end=":")
-
-        # If node type is BOOL, NIL, or DUMMY, print <val>
-        if self.type == "BOOL" or self.type == "NIL" or self.type == "DUMMY":
-            print("<", end="")
-
-        print(self.value, end="")
-
-        # If node type is ID, STR, or INT, print >
-        if self.type == "ID" or self.type == "STR" or self.type == "INT":
-            print(">", end="")
-
-        # If node type is BOOL, NIL, or DUMMY, print >
-        if self.type == "BOOL" or self.type == "NIL" or self.type == "DUMMY":
-            print(">", end="")
-
-        print()
-
-        # Print left and right subtrees
-        if self.left is not None:
-            self.left.print_tree(no_of_dots + 1)
-
-        if self.right is not None:
-            self.right.print_tree(no_of_dots)
-
-
-tree_obj = tree.createNode("value", "type")
-tree_obj.print_tree(0)
-
-
-operators = ['+', '-', '*', '<', '>', '&', '.', '@', '/', ':', '=', '~', '|', '$', '!', '#', '%',
-             '^', '_', '[', ']', '{', '}', '"', '`', '?']
-keys = ["let", "fn", "in", "where", "aug", "or", "not", "true", "false", "nil", "dummy", "within",
-        "and", "rec", "gr", "ge", "ls", "le", "eq", "ne"]
-
-
-class parser:
-    def __init__(self, read_array, i, size, af):
-        self.readnew = read_array[:10000]
-        self.index = i
-        self.sizeOfFile = size
-        self.astFlag = af
-        self.nextToken = Token()
-
-    def isReservedKey(self, s):
-        return s in keys
-
-    def isOperator(self, ch):
-        return ch in operators
-
-    def isAlpha(self, ch):
-        return ch.isalpha()
-
-    def isDigit(self, ch):
-        return ch.isdigit()
-
-    def isBinaryOperator(self, op):
-        binary_operators = ['+', '-', '*', '/', '%', '<', '>',
-                            '=', '==', '<=', '>=', '!=', '&&', '||', '&', '|', '^']
-        return op in binary_operators
-
-    def isNumber(self, s):
-        return s.isdigit()
-
-    def read(self, val, type):
-        if val != self.nextToken.getVal() or type != self.nextToken.getType():
-            print("Parse error: Expected", "\"" + val + "\"", "but",
-                  "\"" + self.nextToken.getVal() + "\"", "was there")
-            exit(0)
-
-        if type == "ID" or type == "INT" or type == "STR":
-            self.buildTree(val, type, 0)
-
-        self.nextToken = self.getToken(self.readnew)
-
-        while self.nextToken.getType() == "DELETE":
-            self.nextToken = self.getToken(self.readnew)
-
-    def procedure_E(self):
-        # E -> ’let’ D ’in’ E
-        if self.nextToken.getVal() == "let":
-            # read("let", "KEYWORD")
-            procedure_D()
-            # read("in", "KEYWORD")  # read in
-            self.procedure_E()
-            # buildTree("let", "KEYWORD", 2)
-
-        # E -> ’fn’ Vb+ ’.’ E
-        elif self.nextToken.getVal() == "fn":
-            n = 0
-            # read("fn", "KEYWORD")
-            while self.nextToken.getType() == "ID" or self.nextToken.getVal() == "(":
-                self.procedure_Vb()
-                n += 1
-            # read(".", "OPERATOR")
-            self.procedure_E()
-            # buildTree("lambda", "KEYWORD", n + 1)
-
-        # E -> Ew
-        else:
-            self.procedure_Ew()
-
-    def procedure_Ew(self):
-        self.procedure_T()
-        if self.nextToken.getVal() == "where":
-            # read("where", "KEYWORD")
-            procedure_Dr()
-            # buildTree("where", "KEYWORD", 2)
-
-    def procedure_T(self):
-        procedure_Ta()
-
-        n = 1
-        while self.nextToken.getVal() == ",":
-            n += 1
-            # read(",", "PUNCTION")
-            procedure_Ta()
-
-        if n > 1:
-            # buildTree("tau", "KEYWORD", n)
-
-
-    def procedure_Ta():
-        procedure_Tc()
-
-        while nextToken.getVal() == "aug":
-            read("aug", "KEYWORD")
-            procedure_Tc()
-            buildTree("aug", "KEYWORD", 2)
-
-
-def procedure_Tc():
-    procedure_B()
-
-    if nextToken.getVal() == "->":
-        read("->", "OPERATOR")
-        procedure_Tc()
-        read("|", "OPERATOR")
-        procedure_Tc()
-        buildTree("->", "KEYWORD", 3)
-
-
-def procedure_B():
-    procedure_Bt()
-
-    while nextToken.getVal() == "or":
-        read("or", "KEYWORD")
-        procedure_Bt()
-        buildTree("or", "KEYWORD", 2)
-
-
-def procedure_Bt():
-    procedure_Bs()
-
-    while nextToken.getVal() == "&":
-        read("&", "OPERATOR")
-        procedure_Bs()
-        buildTree("&", "KEYWORD", 2)
-
-
-def procedure_Bs():
-    if nextToken.getVal() == "not":
-        read("not", "KEYWORD")
-        procedure_Bp()
-        buildTree("not", "KEYWORD", 1)
+        if n > 0:
+            Build_Tree(",", n + 1)
     else:
-        procedure_Bp()
+        print("Error:error occurs near ", next_token, " .IDENTIFIER expected.")
 
 
-def procedure_Bp():
-    procedure_A()
-    temp = nextToken.getVal()
-    temp2 = nextToken.getType()
+Scanning()
+# print(tokens)
+next_token_of_type = ""
+next_token = ""
+current_token = ""
+ast = []
 
-    if temp in ["gr", ">", "ge", ">=", "ls", "<", "le", "<=", "eq", "ne"]:
-        read(temp, temp2)
-        procedure_A()
-        buildTree(temp, "KEYWORD", 2)
-    elif temp == "ne":
-        read(temp, temp2)
-        procedure_A()
-        buildTree(temp, "KEYWORD", 2)
-
-
-def procedure_A():
-    if nextToken.getVal() == "+":
-        read("+", "OPERATOR")
-        procedure_At()
-    elif nextToken.getVal() == "-":
-        read("-", "OPERATOR")
-        procedure_At()
-        buildTree("neg", "KEYWORD", 1)
-    else:
-        procedure_At()
-
-    while nextToken.getVal() in ["+", "-"]:
-        temp = nextToken.getVal()
-        read(temp, "OPERATOR")
-        procedure_At()
-        buildTree(temp, "OPERATOR", 2)
-
-
-def procedure_At():
-    procedure_Af()
-
-    while nextToken.getVal() in ["*", "/"]:
-        temp = nextToken.getVal()
-        read(temp, "OPERATOR")
-        procedure_Af()
-        buildTree(temp, "OPERATOR", 2)
-
-
-def procedure_Af():
-    procedure_Ap()
-
-    if nextToken.getVal() == "**":
-        read("**", "OPERATOR")
-        procedure_Af()
-        buildTree("**", "KEYWORD", 2)
-
-
-def procedure_Ap():
-    procedure_R()
-    while nextToken.getVal() == "@":
-        read("@", "OPERATOR")
-        if nextToken.getType() != "ID":
-            print("Exception: UNEXPECTED_TOKEN")
-        else:
-            read(nextToken.getVal(), "ID")
-            procedure_R()
-            buildTree("@", "KEYWORD", 3)
-
-
-def procedure_R():
-    procedure_Rn()
-    while nextToken.getType() in ["ID", "INT", "STR"] or nextToken.getVal() in ["true", "false", "nil", "(", "dummy"]:
-        procedure_Rn()
-        buildTree("gamma", "KEYWORD", 2)
-
-
-def procedure_Rn():
-    if nextToken.getType() in ["ID", "INT", "STR"]:
-        read(nextToken.getVal(), nextToken.getType())
-    elif nextToken.getVal() in ["true", "false", "nil"]:
-        read(nextToken.getVal(), "KEYWORD")
-        buildTree(nextToken.getVal(), "BOOL", 0)
-    elif nextToken.getVal() == "(":
-        read("(", "PUNCTION")
-        procedure_E()
-        read(")", "PUNCTION")
-    elif nextToken.getVal() == "dummy":
-        read("dummy", "KEYWORD")
-        buildTree("dummy", "DUMMY", 0)
-
-
-def procedure_D():
-    procedure_Da()
-    if nextToken.getVal() == "within":
-        read("within", "KEYWORD")
-        procedure_Da()
-        buildTree("within", "KEYWORD", 2)
-
-
-def procedure_Da():
-    procedure_Dr()
-
-    n = 1
-    while nextToken.getVal() == "and":
-        n += 1
-        read("and", "KEYWORD")
-        procedure_Dr()
-    if n > 1:
-        buildTree("and", "KEYWORD", n)
-
-
-def procedure_Dr():
-    if nextToken.getVal() == "rec":
-        read("rec", "KEYWORD")
-        procedure_Db()
-        buildTree("rec", "KEYWORD", 1)
-    else:
-        procedure_Db()
-
-
-def procedure_Db():
-    if nextToken.getVal() == "(":
-        read("(", "PUNCTION")
-        procedure_D()
-        read(")", "PUNCTION")
-    elif nextToken.getType() == "ID":
-        read(nextToken.getVal(), "ID")
-        n = 1
-        if nextToken.getVal() in ["=", ","]:
-            while nextToken.getVal() == ",":
-                read(",", "PUNCTION")
-                read(nextToken.getVal(), "ID")
-                n += 1
-            if n > 1:
-                buildTree(",", "KEYWORD", n)
-            read("=", "OPERATOR")
-            procedure_E()
-            buildTree("=", "KEYWORD", 2)
-        else:
-            while nextToken.getType() == "ID" or nextToken.getVal() == "(":
-                procedure_Vb()
-                n += 1
-            read("=", "OPERATOR")
-            procedure_E()
-            buildTree("function_form", "KEYWORD", n + 1)
-
-
-def procedure_Vb():
-    if nextToken.getType() == "ID":
-        read(nextToken.getVal(), "ID")
-    elif nextToken.getVal() == "(":
-        read("(", "PUNCTION")
-        if nextToken.getVal() == ")":
-            read(")", "PUNCTION")
-            buildTree("()", "KEYWORD", 0)
-        else:
-            procedure_Vl()
-            read(")", "PUNCTION")
-
-
-def procedure_Vl():
-    n = 1
-    read(nextToken.getVal(), "ID")
-
-    while nextToken.getVal() == ",":
-        read(",", "PUNCTION")
-        read(nextToken.getVal(), "ID")
-        n += 1
-    if n > 1:
-        buildTree(",", "KEYWORD", n)
-
-
-
-read_array = ["let", "x", "=", 5]
-i = 0
-size = len(read_array)
-af = 1
-parser_obj = parser(read_array, i, size, af)
-print(parser_obj.isReservedKey("some"))
-for i in range(size):
-    print(read_array[i])
-    print(parser_obj.isReservedKey(read_array[i]))
-    print(parser_obj.isOperator(read_array[i]))
-#     print(parser_obj.isAlpha(read_array[i]))
-#     print(parser_obj.isDigit(read_array[i]))
-    print(parser_obj.isBinaryOperator(read_array[i]))
-#     print(parser_obj.isNumber(read_array[i]))
-    print("")
+Read("")
+Procedure_E()
+Print_AST()
