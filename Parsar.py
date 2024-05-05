@@ -612,14 +612,18 @@ class standardizer:
         return None
 
     def createControlStructures(self, x, setOfControlStruct):
+        # print(setOfControlStruct)
+        if x is not None:
+            print(x.getVal())
         global index, j, i, betaCount
-        i = 0
-        j = 0
-        index = 0
-        betaCount = 0
+        # i = 0
+        # j = 0
+        # index = 0
+        # betaCount = 0
 
         if x is None:
             return
+
 
         if x.getVal() == "lambda":
             t1 = i
@@ -634,11 +638,12 @@ class standardizer:
             index += 1
 
             temp = ASTNode(str(k), "deltaNumber")
-            setOfControlStruct[i][j + 1] = temp
-
-            setOfControlStruct[i][j + 2] = x.left
-
-            setOfControlStruct[i][j + 3] = x
+            setOfControlStruct[i][j] = temp
+            j += 1
+            setOfControlStruct[i][j] = x.left
+            j += 1
+            setOfControlStruct[i][j] = x
+            j += 1
 
             myStoredIndex = i
             tempj = j + 3
@@ -722,8 +727,8 @@ class standardizer:
                 self.createControlStructures(x.right, setOfControlStruct)
                 x = x.right
         else:
-            print(i)
             setOfControlStruct[i][j] = ASTNode(x.getVal(), x.getType())
+            j += 1
             self.createControlStructures(x.left, setOfControlStruct)
             if x.left is not None:
                 self.createControlStructures(x.left.right, setOfControlStruct)
@@ -1572,10 +1577,12 @@ print(root.getVal(), "*********************************")
 
 myParser.preOrderTraversal(root)
 
-# print("Last index of the read input =", myParser.index)
+print("Last index of the read input =", myParser.index)
 
+index = betaCount = 1
+j = i = 0
 
-controlStructureArray = [[None for _ in range(200)] for _ in range(200)]
+controlStructureArray = [[None for _ in range(30)] for _ in range(30)]
 stand.createControlStructures(root, controlStructureArray)
 
 size = 0
