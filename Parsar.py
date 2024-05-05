@@ -717,9 +717,11 @@ class standardizer:
 
             countNode = ASTNode(str(numOfChildren), "CHILDCOUNT")
             setOfControlStruct[i][j] = countNode
+            j += 1
 
             tauNode = ASTNode("tau", "tau")
-            setOfControlStruct[i][j + 1] = tauNode
+            setOfControlStruct[i][j] = tauNode
+            j += 1
 
             self.createControlStructures(x.left, setOfControlStruct)
             x = x.left
@@ -1284,7 +1286,7 @@ class standardizer:
                                     else:
                                         if temp[i].getVal() == "tau":
                                             res = []
-                                            arrangeTuple(temp[i], res)
+                                            self.arrangeTuple(temp[i], res)
                                         m_stack.push(temp[i])
                                     i += 1
                             flag = 1
