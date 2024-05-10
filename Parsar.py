@@ -1151,7 +1151,8 @@ class standardizer:
 
                     if isNextString.getType() == "STR":
                         strRes = (
-                            "'" + isNextString.getVal()[1] + "'"
+                            # "'" + isNextString.getVal()[1] + "'"
+                            "'" + isNextString.getVal() + "'"
                         )  # Get first character
                         m_stack.append(ASTNode(strRes, "STR"))
 
@@ -1166,7 +1167,8 @@ class standardizer:
 
                     if isNextString.getType() == "STR":
                         strRes = (
-                            "'" + isNextString.getVal()[2:-1] + "'"
+                            # "'" + isNextString.getVal()[2:-1] + "'"
+                            "'" + isNextString.getVal()[:] + "'"
                         )  # Get remaining characters
                         m_stack.append(ASTNode(strRes, "STR"))
 
@@ -1204,10 +1206,16 @@ class standardizer:
                         and secondString.left.getVal() == "true"
                     ):
                         m_stack.pop()
+                        # res = (
+                        #     "'"
+                        #     + firstString.getVal()[1:-1]
+                        #     + secondString.getVal()[1:-1]
+                        #     + "'"
+                        # )
                         res = (
                             "'"
-                            + firstString.getVal()[1:-1]
-                            + secondString.getVal()[1:-1]
+                            + firstString.getVal()
+                            + secondString.getVal()
                             + "'"
                         )
                         resNode = ASTNode(res, "STR")

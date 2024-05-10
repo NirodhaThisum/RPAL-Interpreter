@@ -9,7 +9,7 @@ else:
 '''
 
 
-file = "tests/vectorsum"
+file = "tests/t3"
 astFlag = "-ast"
 
 scanner = RPAL_Scanner(file)  # Give the name of the file
@@ -49,11 +49,11 @@ for x in range(size):
     setOfControlStruct.append(temp)
 
 
-print("*********************************")
-for i in setOfControlStruct:
-    for j in i:
-        print(j.value)
-    print("*********")    
+# print("*********************************")
+# for i in setOfControlStruct:
+#     for j in i:
+#         print(j.value)
+#     print("*********")    
 
 
 stand.cse_machine(setOfControlStruct)
