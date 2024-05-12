@@ -9,7 +9,7 @@ else:
 '''
 
 
-file = "tests/t3"
+file = "tests/towers"
 astFlag = "-ast"
 
 scanner = RPAL_Scanner(file)  # Give the name of the file
