@@ -3,6 +3,7 @@ import copy
 from MyScanner import RPAL_Scanner
 from MyScanner import Token
 from Environment import *
+
 # from main import i, index, betaCount, j
 
 
@@ -624,7 +625,7 @@ class standardizer:
         #     print(x.getVal())
 
         global index, j, i, betaCount
-        
+
         # i = 0
         # j = 0
         # index = 1
@@ -1013,7 +1014,7 @@ class standardizer:
                     control.append(ASTNode("gamma", "KEYWORD"))
 
                 elif machineTop.getVal() == "Print":  # Print next item on stack
-                   
+
                     m_stack.pop()
                     nextToPrint = m_stack[-1]  # Get item to print
 
@@ -1151,8 +1152,10 @@ class standardizer:
 
                     if isNextString.getType() == "STR":
                         strRes = (
-                            # "'" + isNextString.getVal()[1] + "'"
-                            "'" + isNextString.getVal() + "'"
+                            "'" + isNextString.getVal()[1] + "'"
+                            # "'"
+                            # + isNextString.getVal()
+                            # + "'"
                         )  # Get first character
                         m_stack.append(ASTNode(strRes, "STR"))
 
@@ -1167,8 +1170,10 @@ class standardizer:
 
                     if isNextString.getType() == "STR":
                         strRes = (
-                            # "'" + isNextString.getVal()[2:-1] + "'"
-                            "'" + isNextString.getVal()[:] + "'"
+                            "'"
+                            + isNextString.getVal()[1:]
+                            + "'"
+                            # "'" + isNextString.getVal()[:] + "'"
                         )  # Get remaining characters
                         m_stack.append(ASTNode(strRes, "STR"))
 
@@ -1212,12 +1217,7 @@ class standardizer:
                         #     + secondString.getVal()[1:-1]
                         #     + "'"
                         # )
-                        res = (
-                            "'"
-                            + firstString.getVal()
-                            + secondString.getVal()
-                            + "'"
-                        )
+                        res = "'" + firstString.getVal() + secondString.getVal() + "'"
                         resNode = ASTNode(res, "STR")
                         m_stack.append(resNode)
                         control.pop()
@@ -1338,8 +1338,8 @@ class standardizer:
                     m_stack.pop()
 
                     if node1.getType() == "INT" and node2.getType() == "INT":
-                        num1 = int(node1.getVal())
-                        num2 = int(node2.getVal())
+                        num1 = int(float(node1.getVal()))
+                        num2 = int(float(node2.getVal()))
 
                         res = 0
                         resPow = 0.0
@@ -1575,9 +1575,6 @@ class standardizer:
         self.arrangeTuple(tau_node.right, res)
 
     def addSpaces(self, temp):
-        temp = temp.replace(r"\n", "\\n").replace(r"\t", "\\t")
-        temp = temp.replace("\\", "").replace("'", "")
+        temp = temp.replace("\\n", '\n').replace("\\t", '\t')
+        temp = temp.replace("'", "")
         return temp
-
-
-
