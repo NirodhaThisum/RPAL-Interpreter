@@ -621,12 +621,9 @@ class standardizer:
         return None
 
     def createControlStructures(self, x, setOfControlStruct):
-        # print(setOfControlStruct)
-        # if x is not None:
-        #     print(x.getVal())
-
         global index, j, i, betaCount
 
+        #initial values of global varibales
         # i = 0
         # j = 0
         # index = 1
