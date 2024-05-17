@@ -64,12 +64,13 @@ if not hasInputError or hasParsingError:
     #     for j in i:
     #         print(j.value)
     #     print("*********")    
-
-    try:
-        stand.cse_machine(setOfControlStruct)
-    except Exception as e:
-        print("CSE machine error")
-        print(e)
+    
+    if astFlag != "-ast":
+        try:
+            stand.cse_machine(setOfControlStruct)
+        except Exception as e:
+            print("CSE machine error")
+            print(e)
 
 elif hasParsingError:
     print("There is an Error in parsing. Check syntax of the program.")
