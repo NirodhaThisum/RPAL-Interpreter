@@ -1,11 +1,7 @@
-import sys
 import copy
 from MyScanner import RPAL_Scanner
 from MyScanner import Token
 from Environment import *
-
-# from main import i, index, betaCount, j
-
 
 # g;obal variables for conntrol structures
 index = betaCount = 1
@@ -17,7 +13,7 @@ class ASTNode:
         self.left = None
         self.right = None
         self.token = None
-        self.type = type  # This is for thr printing of AST node
+        self.type = type 
         self.value = value
         self.indentation = 0
 
@@ -89,7 +85,11 @@ class ASTParser:
         elif astFlag == "":
             pass
         else:
+            # self.errorExist = True
             print("Give a correct input command")
+
+    def isAnError(self):
+        return self.errorExist
 
     def buildTree(self, token, type, numOfChilds):
         # pass the transduction grammar value as the token

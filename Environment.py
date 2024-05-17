@@ -8,9 +8,3 @@ class Environment:
             self.prev = other.prev
             self.name = other.name
             self.boundVar = other.boundVar.copy()
-
-    def assign_from(self, other):
-        self.prev = other.prev
-        self.name = other.name
-        self.boundVar = other.boundVar.copy()
-        return self
