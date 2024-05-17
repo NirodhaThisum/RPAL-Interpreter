@@ -1118,7 +1118,7 @@ class standardizer:
                 ):  # Check if next item in stack is a function
                     m_stack.pop()  # Pop Isfunction token
 
-                    isNextFn = m_stack.pop()  # Get next item in stack
+                    isNextFn = m_stack[-1] # Get next item in stack
 
                     if isNextFn.getVal() == "lambda":
                         resNode = ASTNode("true", "BOOL")
@@ -1132,7 +1132,7 @@ class standardizer:
                 ):  # Check if next item in stack is dummy
                     m_stack.pop()  # Pop Isdummy token
 
-                    isNextDmy = m_stack.pop()  # Get next item in stack
+                    isNextDmy = m_stack[-1]  # Get next item in stack
 
                     if isNextDmy.getVal() == "dummy":
                         resNode = ASTNode("true", "BOOL")
@@ -1143,25 +1143,23 @@ class standardizer:
 
                 elif machineTop.getVal() == "Stem":  # Get first character of string
                     m_stack.pop()  # Pop Stem token
-                    isNextString = m_stack.pop()  # Get next item in stack
+                    isNextString = m_stack[-1]  # Get next item in stack
 
                     if isNextString.getVal() == "":
                         return
 
                     if isNextString.getType() == "STR":
                         strRes = (
-                            "'" + isNextString.getVal()[1] + "'"
-                            # "'"
-                            # + isNextString.getVal()
-                            # + "'"
+                            "'" + isNextString.getVal()[0] + "'"
                         )  # Get first character
+                        m_stack.pop()
                         m_stack.append(ASTNode(strRes, "STR"))
 
                 elif (
                     machineTop.getVal() == "Stern"
                 ):  # Get remaining characters other the first character
                     m_stack.pop()  # Pop Stern token
-                    isNextString = m_stack.pop()  # Get next item in stack
+                    isNextString = m_stack[-1]  # Get next item in stack
 
                     if isNextString.getVal() == "":
                         return
@@ -1173,6 +1171,7 @@ class standardizer:
                             + "'"
                             # "'" + isNextString.getVal()[:] + "'"
                         )  # Get remaining characters
+                        m_stack.pop()
                         m_stack.append(ASTNode(strRes, "STR"))
 
                 elif machineTop.getVal() == "Order":  # Get number of items in tuple
@@ -1201,7 +1200,7 @@ class standardizer:
 
                     firstString = m_stack.pop()  # Get first string
 
-                    secondString = m_stack.pop()  # Get second string
+                    secondString = m_stack[-1]  # Get second string
 
                     if secondString.getType() == "STR" or (
                         secondString.getType() == "STR"
@@ -1251,8 +1250,6 @@ class standardizer:
                     nextToken.getVal() == remEnv.getVal()
                 ):  # If the environment to remove is the same as the one on top of the control stack
                     m_stack.pop()
-
-                    printMachine = m_stack.copy()
 
                     getCurrEnvironment.pop()
                     if getCurrEnvironment:
