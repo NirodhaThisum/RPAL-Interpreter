@@ -48,6 +48,7 @@ class ASTParser:
         self.current_token = self.tokens[self.index]
 
         if self.current_token.value != value and value != "UserDefined":
+            print("Expected", self.current_token.value, "but got ", value)
             self.errorExist = True
             return
 
@@ -79,7 +80,7 @@ class ASTParser:
         self.current_token = self.tokens[0]
         self.E()
         if self.errorExist:
-            print("There is an Error")
+            print("There is an error in parsing")
         elif astFlag == "-ast":
             self.preOrderTraversal(self.stack[0])
         elif astFlag == "":

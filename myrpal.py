@@ -29,7 +29,7 @@ myParser = ASTParser(tokens)
 myParser.startParsing(astFlag)
 hasParsingError = myParser.isAnError()
 
-if not hasInputError or hasParsingError:
+if not hasInputError  and (not hasParsingError):
     root = myParser.stack[0]
     stand = standardizer(root)
 
@@ -73,7 +73,7 @@ if not hasInputError or hasParsingError:
             print(e)
 
 elif hasParsingError:
-    print("There is an Error in parsing. Check syntax of the program.")
+    pass  # parsar has already print the message for this error
 
 else:
     print("Input Format is Wrong")
