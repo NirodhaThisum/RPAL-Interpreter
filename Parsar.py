@@ -836,9 +836,8 @@ class standardizer:
                     prevEnv = m_stack.pop()
                     # Pop the environment in which it was created
                     boundVar = m_stack.pop()  # Pop variable bounded to lambda
-                    nextDeltaIndex = (
-                        m_stack.pop()
-                    )  # Pop index of next control structure to access
+                    nextDeltaIndex = m_stack.pop()
+                    # Pop index of next control structure to access
 
                     newEnv = Environment()  # Create new environment
                     newEnv.name = "env" + str(currEnvIndex)
@@ -1150,7 +1149,7 @@ class standardizer:
 
                     if isNextString.getType() == "STR":
                         strRes = (
-                            "'" + isNextString.getVal()[0] + "'"
+                             isNextString.getVal()[0]
                         )  # Get first character
                         m_stack.pop()
                         m_stack.append(ASTNode(strRes, "STR"))
@@ -1166,9 +1165,9 @@ class standardizer:
 
                     if isNextString.getType() == "STR":
                         strRes = (
-                            "'"
-                            + isNextString.getVal()[1:]
-                            + "'"
+
+                            isNextString.getVal()[1:]
+
                             # "'" + isNextString.getVal()[:] + "'"
                         )  # Get remaining characters
                         m_stack.pop()
@@ -1214,7 +1213,7 @@ class standardizer:
                         #     + secondString.getVal()[1:-1]
                         #     + "'"
                         # )
-                        res = "'" + firstString.getVal() + secondString.getVal() + "'"
+                        res =  firstString.getVal() + secondString.getVal()
                         resNode = ASTNode(res, "STR")
                         m_stack.append(resNode)
                         control.pop()
